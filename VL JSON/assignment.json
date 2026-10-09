@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Task 1 Dashboard: Regional GVA Multi-Year Overview",
+    "fontSize": 18,
+    "anchor": "start"
+  },
+  "data": {
+    "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/employment_by_sector_clean.csv"
+  },
+  "transform": [
+    {"filter": "datum['NACE Rev. 2 Sector'] != 'All Sectors'"},
+    {
+      "calculate": "datum['Gross Value Added (GVA) at Basic Prices'] / 1000000",
+      "as": "GVA_Millions"
+    }
+  ],
+  "vconcat": [
+    {
+      "title": "Multi-Year Cumulative GVA Trend by Region",
+      "width": 650,
+      "height": 260,
+      "mark": {"type": "line", "point": true, "tooltip": true},
+      "encoding": {
+        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
+        "y": {
+          "field": "GVA_Millions",
+          "type": "quantitative",
+          "aggregate": "sum",
+          "title": "Total GVA (€ Millions)"
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region"
+        }
+      }
+    },
+    {
+      "width": 650,
+      "height": 260,
+      "mark": {"type": "bar", "tooltip": true},
+      "encoding": {
+        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
+        "y": {
+          "field": "GVA_Millions",
+          "type": "quantitative",
+          "aggregate": "sum",
+          "title": "Total GVA (€ Millions)"
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region"
+        },
+        "xOffset": {"field": "NUTS 2 Region"}
+      }
+    }
+  ],
+  "config": {}
+}
