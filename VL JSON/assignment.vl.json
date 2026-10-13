@@ -1,0 +1,266 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Irish Economic Overview: GVA, Employment, and Regional Trends",
+    "fontSize": 18,
+    "anchor": "start"
+  },
+  "data": {
+    "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/employment_by_sector_clean.csv"
+  },
+  "transform": [
+    {"calculate": "datum['NACE Rev. 2 Sector']", "as": "Sector"},
+    {
+      "calculate": "datum['Gross Value Added (GVA) at Basic Prices'] / 1000000",
+      "as": "GVA_Millions"
+    },
+    {"filter": "datum.Sector != 'All Sectors'"}
+  ],
+  "resolve": {"scale": {"color": "independent", "shape": "independent"}},
+  "vconcat": [
+    {
+      "title": "Chart 1: Multi-Year Cumulative GVA Trend by Region",
+      "width": 650,
+      "height": 240,
+      "mark": {"type": "line", "point": true, "tooltip": true},
+      "encoding": {
+        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
+        "y": {
+          "field": "GVA_Millions",
+          "type": "quantitative",
+          "aggregate": "sum",
+          "title": "Total GVA (€ Millions)"
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region"
+        }
+      }
+    },
+    {
+      "title": "Chart 2: Annual Regional GVA Comparison (Grouped Bar)",
+      "width": 650,
+      "height": 240,
+      "mark": {"type": "bar", "tooltip": true},
+      "encoding": {
+        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
+        "y": {
+          "field": "GVA_Millions",
+          "type": "quantitative",
+          "aggregate": "sum",
+          "title": "Total GVA (€ Millions)"
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region"
+        },
+        "xOffset": {"field": "NUTS 2 Region"}
+      }
+    },
+    {
+      "title": "Chart 3: Interactive Annual Snapshot (GVA vs Employment by Sector)",
+      "width": 650,
+      "height": 260,
+      "transform": [
+        {"calculate": "toNumber(datum['Year'])", "as": "Year"},
+        {"filter": {"param": "YearSelect1"}}
+      ],
+      "mark": {"type": "point", "filled": true, "size": 100, "tooltip": true},
+      "encoding": {
+        "x": {
+          "field": "Total Persons at Work",
+          "type": "quantitative",
+          "title": "Total Persons at Work",
+          "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
+        },
+        "y": {
+          "field": "GVA_Millions",
+          "type": "quantitative",
+          "title": "Gross Value Added (€ Millions)",
+          "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
+        },
+        "color": {"field": "Sector", "type": "nominal", "title": "NACE Sector"},
+        "shape": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region (Shape)"
+        }
+      }
+    },
+    {
+      "title": {
+        "text": "Select Year:",
+        "anchor": "start",
+        "fontSize": 12,
+        "fontWeight": "normal"
+      },
+      "width": 650,
+      "height": 28,
+      "data": {
+        "values": [
+          {"Year": 2000},
+          {"Year": 2001},
+          {"Year": 2002},
+          {"Year": 2003},
+          {"Year": 2004},
+          {"Year": 2005},
+          {"Year": 2006},
+          {"Year": 2007},
+          {"Year": 2008},
+          {"Year": 2009},
+          {"Year": 2010},
+          {"Year": 2011},
+          {"Year": 2012},
+          {"Year": 2013},
+          {"Year": 2014},
+          {"Year": 2015},
+          {"Year": 2016},
+          {"Year": 2017},
+          {"Year": 2018},
+          {"Year": 2019},
+          {"Year": 2020},
+          {"Year": 2021},
+          {"Year": 2022},
+          {"Year": 2023}
+        ]
+      },
+      "transform": [],
+      "encoding": {"x": {"field": "Year", "type": "ordinal", "axis": null}},
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "YearSelect1",
+              "select": {"type": "point", "fields": ["Year"], "clear": false},
+              "value": [{"Year": 2023}]
+            }
+          ],
+          "mark": {"type": "rect", "cursor": "pointer", "stroke": "white"},
+          "encoding": {
+            "color": {
+              "condition": {"param": "YearSelect1", "value": "#4c78a8"},
+              "value": "#e3e3e3"
+            }
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 10, "cursor": "pointer"},
+          "encoding": {
+            "text": {"field": "Year", "type": "ordinal"},
+            "color": {
+              "condition": {"param": "YearSelect1", "value": "white"},
+              "value": "#333"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Chart 4: Regional Productivity Comparison",
+      "transform": [
+        {"calculate": "toNumber(datum['Year'])", "as": "Year"},
+        {"filter": {"param": "YearSelect2"}}
+      ],
+      "facet": {
+        "field": "NUTS 2 Region",
+        "type": "nominal",
+        "header": {"title": "Region Panel"}
+      },
+      "spec": {
+        "width": 280,
+        "height": 200,
+        "mark": {"type": "point", "filled": true, "size": 70, "tooltip": true},
+        "encoding": {
+          "x": {
+            "field": "Total Persons at Work",
+            "type": "quantitative",
+            "title": "Jobs",
+            "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
+          },
+          "y": {
+            "field": "GVA_Millions",
+            "type": "quantitative",
+            "title": "GVA (€M)",
+            "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
+          },
+          "color": {
+            "field": "Sector",
+            "type": "nominal",
+            "title": "NACE Sector"
+          }
+        }
+      }
+    },
+    {
+      "title": {
+        "text": "Select Year:",
+        "anchor": "start",
+        "fontSize": 12,
+        "fontWeight": "normal"
+      },
+      "width": 650,
+      "height": 28,
+      "data": {
+        "values": [
+          {"Year": 2000},
+          {"Year": 2001},
+          {"Year": 2002},
+          {"Year": 2003},
+          {"Year": 2004},
+          {"Year": 2005},
+          {"Year": 2006},
+          {"Year": 2007},
+          {"Year": 2008},
+          {"Year": 2009},
+          {"Year": 2010},
+          {"Year": 2011},
+          {"Year": 2012},
+          {"Year": 2013},
+          {"Year": 2014},
+          {"Year": 2015},
+          {"Year": 2016},
+          {"Year": 2017},
+          {"Year": 2018},
+          {"Year": 2019},
+          {"Year": 2020},
+          {"Year": 2021},
+          {"Year": 2022},
+          {"Year": 2023}
+        ]
+      },
+      "transform": [],
+      "encoding": {"x": {"field": "Year", "type": "ordinal", "axis": null}},
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "YearSelect2",
+              "select": {"type": "point", "fields": ["Year"], "clear": false},
+              "value": [{"Year": 2023}]
+            }
+          ],
+          "mark": {"type": "rect", "cursor": "pointer", "stroke": "white"},
+          "encoding": {
+            "color": {
+              "condition": {"param": "YearSelect2", "value": "#4c78a8"},
+              "value": "#e3e3e3"
+            }
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 10, "cursor": "pointer"},
+          "encoding": {
+            "text": {"field": "Year", "type": "ordinal"},
+            "color": {
+              "condition": {"param": "YearSelect2", "value": "white"},
+              "value": "#333"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "config": {}
+}
