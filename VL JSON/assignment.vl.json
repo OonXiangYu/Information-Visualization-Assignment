@@ -5,21 +5,22 @@
     "fontSize": 18,
     "anchor": "start"
   },
-  "data": {
-    "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/employment_by_sector_clean.csv"
-  },
-  "transform": [
-    {"calculate": "datum['NACE Rev. 2 Sector']", "as": "Sector"},
-    {
-      "calculate": "datum['Gross Value Added (GVA) at Basic Prices'] / 1000000",
-      "as": "GVA_Millions"
-    },
-    {"filter": "datum.Sector != 'All Sectors'"}
-  ],
   "resolve": {"scale": {"color": "independent", "shape": "independent"}},
   "vconcat": [
     {
       "title": "Chart 1: Multi-Year Cumulative GVA Trend by Region",
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/employment_by_sector_clean.csv"
+      },
+      "transform": [
+        {"calculate": "datum['NACE Rev. 2 Sector']", "as": "Sector"},
+        {
+          "calculate": "datum['Gross Value Added (GVA) at Basic Prices'] / 1000000",
+          "as": "GVA_Millions"
+        },
+        {"filter": "datum.Sector != 'All Sectors'"},
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"}
+      ],
       "width": 650,
       "height": 240,
       "mark": {"type": "line", "point": true, "tooltip": true},
@@ -39,53 +40,48 @@
       }
     },
     {
-      "title": "Chart 2: Annual Regional GVA Comparison (Grouped Bar)",
-      "width": 650,
-      "height": 240,
-      "mark": {"type": "bar", "tooltip": true},
-      "encoding": {
-        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
-        "y": {
-          "field": "GVA_Millions",
-          "type": "quantitative",
-          "aggregate": "sum",
-          "title": "Total GVA (€ Millions)"
-        },
-        "color": {
-          "field": "NUTS 2 Region",
-          "type": "nominal",
-          "title": "Region"
-        },
-        "xOffset": {"field": "NUTS 2 Region"}
-      }
-    },
-    {
-      "title": "Chart 3: Interactive Annual Snapshot (GVA vs Employment by Sector)",
-      "width": 650,
-      "height": 260,
+      "title": "Chart 2: Regional Productivity Comparison",
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/employment_by_sector_clean.csv"
+      },
       "transform": [
+        {"calculate": "datum['NACE Rev. 2 Sector']", "as": "Sector"},
+        {
+          "calculate": "datum['Gross Value Added (GVA) at Basic Prices'] / 1000000",
+          "as": "GVA_Millions"
+        },
+        {"filter": "datum.Sector != 'All Sectors'"},
         {"calculate": "toNumber(datum['Year'])", "as": "Year"},
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"},
         {"filter": {"param": "YearSelect1"}}
       ],
-      "mark": {"type": "point", "filled": true, "size": 100, "tooltip": true},
-      "encoding": {
-        "x": {
-          "field": "Total Persons at Work",
-          "type": "quantitative",
-          "title": "Total Persons at Work",
-          "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
-        },
-        "y": {
-          "field": "GVA_Millions",
-          "type": "quantitative",
-          "title": "Gross Value Added (€ Millions)",
-          "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
-        },
-        "color": {"field": "Sector", "type": "nominal", "title": "NACE Sector"},
-        "shape": {
-          "field": "NUTS 2 Region",
-          "type": "nominal",
-          "title": "Region (Shape)"
+      "facet": {
+        "field": "NUTS 2 Region",
+        "type": "nominal",
+        "header": {"title": "Region Panel"}
+      },
+      "spec": {
+        "width": 280,
+        "height": 200,
+        "mark": {"type": "point", "filled": true, "size": 70, "tooltip": true},
+        "encoding": {
+          "x": {
+            "field": "Total Persons at Work",
+            "type": "quantitative",
+            "title": "Total Persons at Work",
+            "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
+          },
+          "y": {
+            "field": "GVA_Millions",
+            "type": "quantitative",
+            "title": "GVA (€M)",
+            "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
+          },
+          "color": {
+            "field": "Sector",
+            "type": "nominal",
+            "title": "NACE Sector"
+          }
         }
       }
     },
@@ -158,103 +154,160 @@
       ]
     },
     {
-      "title": "Chart 4: Regional Productivity Comparison",
-      "transform": [
-        {"calculate": "toNumber(datum['Year'])", "as": "Year"},
-        {"filter": {"param": "YearSelect2"}}
-      ],
-      "facet": {
-        "field": "NUTS 2 Region",
-        "type": "nominal",
-        "header": {"title": "Region Panel"}
+      "title": "Chart 3: Population vs Total GDP by Region, 2000-2023 (Bubble Size = GDP per Person)",
+      "width": 900,
+      "height": 450,
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/tax_and_gdp_by_region_clean.csv"
       },
-      "spec": {
-        "width": 280,
-        "height": 200,
-        "mark": {"type": "point", "filled": true, "size": 70, "tooltip": true},
-        "encoding": {
-          "x": {
-            "field": "Total Persons at Work",
-            "type": "quantitative",
-            "title": "Jobs",
-            "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
+      "transform": [
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"},
+        {
+          "filter": "!isArray(RegionSelect.Region) || indexof(RegionSelect.Region, 'All Regions') >= 0 || indexof(RegionSelect.Region, datum['NUTS 2 Region']) >= 0"
+        },
+        {
+          "calculate": "datum['Gross Domestic Product in Current Market Prices'] / 1000000",
+          "as": "GDP_Millions"
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "Population",
+          "type": "quantitative",
+          "title": "Population",
+          "scale": {
+            "nice": false,
+            "domain": {
+              "expr": "{'All Regions':[500000,2800000],'Eastern and Midland':[1750000,2650000],'Northern and Western':[550000,950000],'Southern':[1250000,1800000]}[isArray(RegionSelect.Region) ? RegionSelect.Region[0] : 'All Regions']"
+            }
           },
-          "y": {
-            "field": "GVA_Millions",
-            "type": "quantitative",
-            "title": "GVA (€M)",
-            "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
+          "axis": {
+            "format": ",.0f",
+            "labelFontSize": 10,
+            "titleFontSize": 11,
+            "values": {
+              "expr": "{'All Regions':[500000,1000000,1500000,2000000,2500000],'Eastern and Midland':[1800000,2000000,2200000,2400000,2600000],'Northern and Western':[600000,700000,800000,900000],'Southern':[1300000,1400000,1500000,1600000,1700000]}[isArray(RegionSelect.Region) ? RegionSelect.Region[0] : 'All Regions']"
+            }
+          }
+        },
+        "y": {
+          "field": "GDP_Millions",
+          "type": "quantitative",
+          "title": "Total GDP (€ Millions)",
+          "scale": {
+            "type": "linear",
+            "nice": false,
+            "domain": {
+              "expr": "{'All Regions':[0,320000],'Eastern and Midland':[50000,320000],'Northern and Western':[10000,50000],'Southern':[30000,210000]}[isArray(RegionSelect.Region) ? RegionSelect.Region[0] : 'All Regions']"
+            }
           },
-          "color": {
-            "field": "Sector",
-            "type": "nominal",
-            "title": "NACE Sector"
+          "axis": {
+            "format": ",.0f",
+            "labelFontSize": 10,
+            "titleFontSize": 11,
+            "values": {
+              "expr": "{'All Regions':[0,50000,100000,150000,200000,250000,300000],'Eastern and Midland':[50000,100000,150000,200000,250000,300000],'Northern and Western':[10000,20000,30000,40000,50000],'Southern':[30000,60000,90000,120000,150000,180000,210000]}[isArray(RegionSelect.Region) ? RegionSelect.Region[0] : 'All Regions']"
+            }
+          }
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region",
+          "scale": {
+            "domain": [
+              "Eastern and Midland",
+              "Northern and Western",
+              "Southern"
+            ],
+            "range": ["#4c78a8", "#f58518", "#e45756"]
           }
         }
-      }
+      },
+      "layer": [
+        {
+          "mark": {
+            "type": "circle",
+            "opacity": 0.55,
+            "stroke": "white",
+            "strokeWidth": 0.5
+          },
+          "encoding": {
+            "size": {
+              "field": "Gross Domestic Product (GDP) per Person",
+              "type": "quantitative",
+              "title": "GDP per Person (€)",
+              "scale": {"domain": [15000, 115000], "range": [40, 900]},
+              "legend": {"format": ",.0f"}
+            },
+            "tooltip": [
+              {"field": "NUTS 2 Region", "type": "nominal", "title": "Region"},
+              {"field": "Year", "type": "ordinal"},
+              {"field": "Population", "type": "quantitative", "format": ",.0f"},
+              {
+                "field": "GDP_Millions",
+                "type": "quantitative",
+                "title": "Total GDP (€M)",
+                "format": ",.0f"
+              },
+              {
+                "field": "Gross Domestic Product (GDP) per Person",
+                "type": "quantitative",
+                "title": "GDP per Person (€)",
+                "format": ",.0f"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "text", "dy": -12, "fontSize": 9},
+          "encoding": {"text": {"field": "Year", "type": "ordinal"}}
+        }
+      ]
     },
     {
       "title": {
-        "text": "Select Year:",
+        "text": "Region (click to choose):",
         "anchor": "start",
         "fontSize": 12,
         "fontWeight": "normal"
       },
-      "width": 650,
+      "width": 900,
       "height": 28,
       "data": {
         "values": [
-          {"Year": 2000},
-          {"Year": 2001},
-          {"Year": 2002},
-          {"Year": 2003},
-          {"Year": 2004},
-          {"Year": 2005},
-          {"Year": 2006},
-          {"Year": 2007},
-          {"Year": 2008},
-          {"Year": 2009},
-          {"Year": 2010},
-          {"Year": 2011},
-          {"Year": 2012},
-          {"Year": 2013},
-          {"Year": 2014},
-          {"Year": 2015},
-          {"Year": 2016},
-          {"Year": 2017},
-          {"Year": 2018},
-          {"Year": 2019},
-          {"Year": 2020},
-          {"Year": 2021},
-          {"Year": 2022},
-          {"Year": 2023}
+          {"Region": "All Regions"},
+          {"Region": "Eastern and Midland"},
+          {"Region": "Northern and Western"},
+          {"Region": "Southern"}
         ]
       },
-      "transform": [],
-      "encoding": {"x": {"field": "Year", "type": "ordinal", "axis": null}},
+      "encoding": {
+        "x": {"field": "Region", "type": "nominal", "axis": null, "sort": null}
+      },
       "layer": [
         {
           "params": [
             {
-              "name": "YearSelect2",
-              "select": {"type": "point", "fields": ["Year"], "clear": false},
-              "value": [{"Year": 2023}]
+              "name": "RegionSelect",
+              "select": {"type": "point", "fields": ["Region"], "clear": false},
+              "value": [{"Region": "All Regions"}]
             }
           ],
           "mark": {"type": "rect", "cursor": "pointer", "stroke": "white"},
           "encoding": {
             "color": {
-              "condition": {"param": "YearSelect2", "value": "#4c78a8"},
+              "condition": {"param": "RegionSelect", "value": "#4c78a8"},
               "value": "#e3e3e3"
             }
           }
         },
         {
-          "mark": {"type": "text", "fontSize": 10, "cursor": "pointer"},
+          "mark": {"type": "text", "fontSize": 11, "cursor": "pointer"},
           "encoding": {
-            "text": {"field": "Year", "type": "ordinal"},
+            "text": {"field": "Region", "type": "nominal"},
             "color": {
-              "condition": {"param": "YearSelect2", "value": "white"},
+              "condition": {"param": "RegionSelect", "value": "white"},
               "value": "#333"
             }
           }
