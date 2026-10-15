@@ -313,6 +313,159 @@
           }
         }
       ]
+    },
+    {
+      "title": "Chart 4: Regional Fiscal Balance, Taxes vs Subsidies by Region (2000-2023)",
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/tax_and_gdp_by_region_clean.csv"
+      },
+      "transform": [
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"},
+        {
+          "filter": "!isArray(RegionSelect1.Region) || indexof(RegionSelect1.Region, 'All Regions') >= 0 || indexof(RegionSelect1.Region, datum['NUTS 2 Region']) >= 0"
+        },
+        {
+          "fold": [
+            "Product Taxes",
+            "Non-Product Taxes",
+            "Product Subsidies",
+            "Non-Product Subsidies"
+          ],
+          "as": ["Component", "Value"]
+        },
+        {"calculate": "datum.Value / 1000000", "as": "Value_M"},
+        {
+          "calculate": "indexof(['Product Subsidies', 'Non-Product Subsidies'], datum.Component) >= 0 ? -datum.Value_M : datum.Value_M",
+          "as": "Signed_M"
+        }
+      ],
+      "facet": {
+        "column": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "header": {
+            "title": null,
+            "labelFontSize": 12,
+            "labelFontWeight": "bold"
+          }
+        }
+      },
+      "resolve": {"scale": {"y": "shared"}},
+      "spec": {
+        "width": 260,
+        "height": 280,
+        "layer": [
+          {
+            "mark": {"type": "bar", "tooltip": true},
+            "encoding": {
+              "x": {
+                "field": "Year",
+                "type": "ordinal",
+                "title": "Year",
+                "axis": {
+                  "labelAngle": -90,
+                  "labelFontSize": 9,
+                  "labelOverlap": false,
+                  "labelPadding": 4
+                }
+              },
+              "y": {
+                "field": "Signed_M",
+                "type": "quantitative",
+                "aggregate": "sum",
+                "title": "€ Millions (taxes above 0, subsidies below 0)",
+                "axis": {
+                  "format": ",.0f",
+                  "labelFontSize": 10,
+                  "titleFontSize": 11
+                }
+              },
+              "color": {
+                "field": "Component",
+                "type": "nominal",
+                "title": "Tax / Subsidy Type",
+                "scale": {
+                  "domain": [
+                    "Product Taxes",
+                    "Non-Product Taxes",
+                    "Product Subsidies",
+                    "Non-Product Subsidies"
+                  ],
+                  "range": ["#4c78a8", "#9ecae1", "#f58518", "#fdbf6f"]
+                }
+              },
+              "tooltip": [
+                {
+                  "field": "NUTS 2 Region",
+                  "type": "nominal",
+                  "title": "Region"
+                },
+                {"field": "Year", "type": "ordinal"},
+                {"field": "Component", "type": "nominal", "title": "Type"},
+                {
+                  "field": "Value_M",
+                  "type": "quantitative",
+                  "title": "Amount (€M)",
+                  "format": ",.0f"
+                }
+              ]
+            }
+          },
+          {
+            "mark": {"type": "rule", "color": "black", "strokeWidth": 1},
+            "encoding": {"y": {"datum": 0}}
+          }
+        ]
+      }
+    },
+    {
+      "title": {
+        "text": "Region (click to choose):",
+        "anchor": "start",
+        "fontSize": 12,
+        "fontWeight": "normal"
+      },
+      "width": 900,
+      "height": 28,
+      "data": {
+        "values": [
+          {"Region": "All Regions"},
+          {"Region": "Eastern and Midland"},
+          {"Region": "Northern and Western"},
+          {"Region": "Southern"}
+        ]
+      },
+      "encoding": {
+        "x": {"field": "Region", "type": "nominal", "axis": null, "sort": null}
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "RegionSelect1",
+              "select": {"type": "point", "fields": ["Region"], "clear": false},
+              "value": [{"Region": "All Regions"}]
+            }
+          ],
+          "mark": {"type": "rect", "cursor": "pointer", "stroke": "white"},
+          "encoding": {
+            "color": {
+              "condition": {"param": "RegionSelect1", "value": "#4c78a8"},
+              "value": "#e3e3e3"
+            }
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 11, "cursor": "pointer"},
+          "encoding": {
+            "text": {"field": "Region", "type": "nominal"},
+            "color": {
+              "condition": {"param": "RegionSelect1", "value": "white"},
+              "value": "#333"
+            }
+          }
+        }
+      ]
     }
   ],
   "config": {}
