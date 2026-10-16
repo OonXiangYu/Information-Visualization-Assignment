@@ -63,19 +63,28 @@
       "spec": {
         "width": 280,
         "height": 200,
-        "mark": {"type": "point", "filled": true, "size": 70, "tooltip": true},
+        "params": [
+          {"name": "ZoomPan2", "select": "interval", "bind": "scales"}
+        ],
+        "mark": {
+          "type": "point",
+          "filled": true,
+          "size": 70,
+          "tooltip": true,
+          "clip": true
+        },
         "encoding": {
           "x": {
             "field": "Total Persons at Work",
             "type": "quantitative",
             "title": "Total Persons at Work",
-            "scale": {"domain": [0, 800000], "nice": false, "clamp": true}
+            "scale": {"domain": [0, 800000], "nice": false}
           },
           "y": {
             "field": "GVA_Millions",
             "type": "quantitative",
             "title": "GVA (€M)",
-            "scale": {"domain": [0, 200000], "nice": false, "clamp": true}
+            "scale": {"domain": [0, 200000], "nice": false}
           },
           "color": {
             "field": "Sector",
@@ -463,6 +472,173 @@
               "condition": {"param": "RegionSelect1", "value": "white"},
               "value": "#333"
             }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Chart 5: Apparent Productivity Trend by Region, 2000-2023 (Bubble Size = Persons at Work)",
+      "width": 1000,
+      "height": 480,
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/tax_and_gdp_by_region_clean.csv"
+      },
+      "transform": [
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"},
+        {
+          "calculate": "datum['Hours Worked'] / datum['Persons at Work']",
+          "as": "Hours_per_Worker"
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "Year",
+          "type": "ordinal",
+          "title": "Year",
+          "axis": {
+            "labelAngle": 0,
+            "labelFontSize": 10,
+            "titleFontSize": 11,
+            "labelOverlap": false
+          }
+        },
+        "y": {
+          "field": "Apparent Productivity",
+          "type": "quantitative",
+          "title": "Apparent Productivity (€ per person at work)",
+          "scale": {"type": "linear", "nice": false, "domain": [0, 240000]},
+          "axis": {
+            "format": ",.0f",
+            "labelFontSize": 10,
+            "titleFontSize": 11,
+            "values": [0, 40000, 80000, 120000, 160000, 200000, 240000]
+          }
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region",
+          "scale": {
+            "domain": [
+              "Eastern and Midland",
+              "Northern and Western",
+              "Southern"
+            ],
+            "range": ["#4c78a8", "#f58518", "#e45756"]
+          }
+        }
+      },
+      "layer": [
+        {"mark": {"type": "line", "strokeWidth": 1.5, "opacity": 0.3}},
+        {
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "opacity": 0.6,
+            "stroke": "white",
+            "strokeWidth": 1.5
+          },
+          "encoding": {
+            "size": {
+              "field": "Persons at Work",
+              "type": "quantitative",
+              "title": "Persons at Work",
+              "scale": {"domain": [250000, 1450000], "range": [30, 3500]},
+              "legend": {"format": ",.0f"}
+            },
+            "tooltip": [
+              {"field": "NUTS 2 Region", "type": "nominal", "title": "Region"},
+              {"field": "Year", "type": "ordinal"},
+              {
+                "field": "Apparent Productivity",
+                "type": "quantitative",
+                "title": "Productivity (€ per person)",
+                "format": ",.0f"
+              },
+              {
+                "field": "Persons at Work",
+                "type": "quantitative",
+                "format": ",.0f"
+              },
+              {
+                "field": "Hours Worked",
+                "type": "quantitative",
+                "format": ",.0f"
+              },
+              {
+                "field": "Hours_per_Worker",
+                "type": "quantitative",
+                "title": "Hours per Worker",
+                "format": ",.0f"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Chart 8: Compensation per Person at Work by Region, 2000-2023",
+      "data": {
+        "url": "https://raw.githubusercontent.com/OonXiangYu/Information-Visualization-Assignment/refs/heads/main/Cleaned%20Data/tax_and_gdp_by_region_clean.csv"
+      },
+      "transform": [
+        {"filter": "datum['NUTS 2 Region'] != 'Ireland'"},
+        {
+          "calculate": "datum['Compensation of Employees'] / datum['Persons at Work']",
+          "as": "Comp_per_Person"
+        },
+        {
+          "calculate": "datum['Compensation of Employees'] / 1000000",
+          "as": "Comp_Millions"
+        }
+      ],
+      "width": 800,
+      "height": 300,
+      "encoding": {
+        "x": {"field": "Year", "type": "ordinal", "title": "Year"},
+        "y": {
+          "field": "Comp_per_Person",
+          "type": "quantitative",
+          "title": "Compensation per Person at Work (€)",
+          "axis": {"format": ",.0f"}
+        },
+        "color": {
+          "field": "NUTS 2 Region",
+          "type": "nominal",
+          "title": "Region"
+        }
+      },
+      "layer": [
+        {"mark": {"type": "line"}},
+        {
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 60,
+            "tooltip": true
+          },
+          "encoding": {
+            "tooltip": [
+              {"field": "NUTS 2 Region", "type": "nominal", "title": "Region"},
+              {"field": "Year", "type": "ordinal"},
+              {
+                "field": "Comp_per_Person",
+                "type": "quantitative",
+                "title": "Compensation per Person (€)",
+                "format": ",.0f"
+              },
+              {
+                "field": "Comp_Millions",
+                "type": "quantitative",
+                "title": "Total Compensation (€M)",
+                "format": ",.0f"
+              },
+              {
+                "field": "Persons at Work",
+                "type": "quantitative",
+                "format": ",.0f"
+              }
+            ]
           }
         }
       ]
